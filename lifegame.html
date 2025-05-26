@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS Bin</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body{
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background-image: url('https://mblogthumb-phinf.pstatic.net/MjAxODA0MDlfNjEg/MDAxNTIzMjQwNjYxMDc5.wJMshm5UG-iDjuk6EKZKk0mLLBTPlalXUlY8gXgCl5Ug.f37blnrAK9FArS_OGRofjYSxlch-VzMM9x7bHdDi_XIg.PNG.lifesaverclinic/%EC%A7%B1%EA%B5%AC-%EC%BB%B4%ED%93%A8%ED%84%B0-%EB%B0%B0%EA%B2%BD%ED%99%94%EB%A9%B41.png?type=w800');
+            background-size: cover;
+            background-position: center;
+            text-align: center;
+            overflow: hidden;
+        }
+        h1{
+            text-shadow: 5px 4px 3px rgb(255, 255, 255);
+            color: #050e86;
+            margin-bottom: 20px;
+        }
+        
+        /* 버튼들 */
+        .controls{
+            margin-bottom: 40px;
+        }
+        button{
+            background-color: rgba(255, 255, 255, 0.8);
+            border: none;
+            padding: 10px 23px;
+            margin: 10px 8px;
+            font-size: 16px;
+            border-radius: 8px;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+        .clear{
+            background-color: #000000;
+            color: white;
+        }
+        .clear:hover{
+            background-color: #ffffff;
+            color: black;
+            box-shadow: 2px 2px 5px black;
+        }
+        .stop{
+            background-color: rgb(243, 138, 138);
+            color: white;
+        }
+        .stop:hover{
+            background-color: #ffffff;
+            color: rgb(243, 138, 138);
+            box-shadow: 2px 2px 5px rgb(243, 138, 138);
+        }
+        .next{
+            background-color: rgb(64, 111, 204);
+            color: white;
+        }
+        .next:hover{
+            background-color: #ffffff;
+            color: rgb(64, 111, 204);
+            box-shadow: 2px 2px 5px rgb(64, 111, 204);
+        }
+        .start{
+            background-color: rgb(154, 188, 154);
+            color: white;
+        }
+        .start:hover{
+            background-color: #ffffff;
+            color: rgb(154, 188, 154);
+            box-shadow: 2px 2px 5px rgb(154, 188, 154);
+        }
+        button:hover{
+            transform: translateY(-5px);
+        }
+        button:active{
+            background-color: #f0f0f0;
+            transform: scale(0.98);
+        }
+
+        /* 셀 */
+        .cell{
+            display: inline-block;
+            border: 1px solid rgb(167, 229, 251);
+            width: 25px;
+            height: 25px;
+            transition: background-color 0.2s;
+        }
+        .cell:hover{
+            background-color: #050e86;
+            cursor: pointer;
+        }
+
+        /* 마우스 효과 */
+        .sparkle{
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background-color: rgba(255, 85, 85, 0.8);
+            animation: explode 0.8s ease-out forwards;
+            pointer-events: none; /* 클릭 이벤트를 방해하지 않도록 설정 */
+        }
+        @keyframes explode{
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(5);
+                opacity: 0;
+            }
+        }
+    </style>    
+</head>
+<body>
+    <div style="line-height: 15px;">
+        <h1>Life Game - 20233095 김수민 🌱</h1>
+        <div class="controls">
+            <button class="clear" onclick="clearWorld();">Clear</button>
+            <button class="stop" onclick="clearInterval(myInterval);">Stop</button>
+            <button class="next" onclick="NextGeneration();">Next</button>
+            <button class="start" onclick="myInterval = setInterval(NextGeneration, 300);">Start</button>
+        </div>
+
+        <script>
+            const size = 20;
+            const arraySize = size * size;
+            const neighbor = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]];
+            var curr = Array(arraySize);
+            curr.fill(0);
+            var next = Array(arraySize);
+
+            for (let i = 0; i < size; i++) {
+                for (let j = 0; j < size; j++) {
+                    const id = i * size + j;
+                    document.write(`<div class="cell" id="${id}" onclick="Toggle(this, '${id}');"></div>`);
+                }
+                document.write("<br/>");
+            }
+
+            function Toggle(element, id) {
+                if (element.style.backgroundColor == "gray") {
+                    element.style.backgroundColor = "";
+                    curr[parseInt(id)] = 0;
+                } else {
+                    element.style.backgroundColor = "gray";
+                    curr[parseInt(id)] = 1;
+                }
+            }
+
+            function nextState(id) {
+                const i = parseInt(id / size);
+                const j = id % size;
+                let count = 0;
+                for (let k = 0; k < 8; k++) {
+                    const ii = i + neighbor[k][0];
+                    const jj = j + neighbor[k][1];
+                    if (ii < 0 || ii >= size) continue;
+                    if (jj < 0 || jj >= size) continue;
+                    if (curr[ii * size + jj] == 1) count++;
+                }
+                if (curr[i * size + j] == 1 && (count == 2 || count == 3)) return 1;
+                if (curr[i * size + j] == 0 && count == 3) return 1;
+                return 0;
+            }
+
+            function NextGeneration() {
+                console.log(curr);
+                for (let id = 0; id < arraySize; id++) next[id] = nextState(id);
+                for (let id = 0; id < arraySize; id++) curr[id] = next[id];
+                drawWorld();
+            }
+
+            function drawWorld() {
+                for (let id = 0; id < arraySize; id++) {
+                    const element = document.getElementById(String(id));
+                    if (curr[id]) element.style.backgroundColor = "gray";
+                    else element.style.backgroundColor = "";
+                }
+            }
+
+            function clearWorld() {
+                curr.fill(0);
+                drawWorld();
+            }
+
+            //마우스 커서에 대한 이펙트 생성
+            function createSparkle(e) {
+                const sparkle = document.createElement('div');
+                sparkle.classList.add('sparkle');
+                sparkle.style.left = `${e.clientX - 4}px`;
+                sparkle.style.top = `${e.clientY - 4}px`;
+                document.body.appendChild(sparkle);
+
+                //애니메이션이 끝나면 제거되도록록
+                setTimeout(() => {
+                    sparkle.remove();
+                }, 800);
+            }
+
+            //마우스가 움직일 때마다 효과 발생하도록
+            document.addEventListener('mousemove', createSparkle);
+        </script>
+    </div>
+</body>
+</html>
